@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import random
 import pyperclip
+import json
 
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
@@ -41,6 +42,12 @@ def save():
     website_entry_text = website_entry.get()
     email_username_entry_text = email_username_entry.get()
     password_entry_text = password_entry.get()
+    new_data = {
+        website_entry_text: {
+            "email": email_username_entry_text,
+            "password": password_entry_text
+        }
+    }
 
     if len(website_entry_text) == 0:
         messagebox.showinfo(title="Oops", message="Don't leave any fields empty.")
@@ -49,23 +56,22 @@ def save():
     elif len(password_entry_text) == 0:
         messagebox.showinfo(title="Oops", message="Don't leave any fields empty.")
     else:
+        with open("data.json", "r") as data_file:
+            # Reading the old data.
+            data = json.load(data_file)
+            # Updating the old data with the new one.
+            data.update(new_data)
 
-        is_ok = messagebox.askokcancel(title=website_entry_text,
-                                       message=f"These are the details entered: \nEmail: {email_username_entry_text} "
-                                               f"\nPassword: {password_entry_text} \nIs it ok to save?")
+        with open("data.json", "w") as data_file:
+            # Saving the updated data in the file.
+            json.dump(data, data_file, indent=4)
 
-        if is_ok:
-            with open("data.txt", "a") as file:
-                file.write(f"{website_entry_text} |")
-                file.write(f"{email_username_entry_text} |")
-                file.write(f"{password_entry_text} | \n")
+        website_entry.delete(0, END)
+        email_username_entry.delete(0, END)
+        password_entry.delete(0, END)
 
-            website_entry.delete(0, END)
-            email_username_entry.delete(0, END)
-            password_entry.delete(0, END)
-
-            website_entry.focus()
-            email_username_entry.insert(0, "akileshakileshs1234@gmail.com")
+        website_entry.focus()
+        email_username_entry.insert(0, "akileshakileshs1234@gmail.com")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
