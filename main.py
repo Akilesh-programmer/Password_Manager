@@ -45,8 +45,8 @@ def save():
     new_data = {
         website_entry_text: {
             "email": email_username_entry_text,
-            "password": password_entry_text
-        }
+            "password": password_entry_text,
+        },
     }
 
     if len(website_entry_text) == 0:
@@ -56,22 +56,49 @@ def save():
     elif len(password_entry_text) == 0:
         messagebox.showinfo(title="Oops", message="Don't leave any fields empty.")
     else:
-        with open("data.json", "r") as data_file:
-            # Reading the old data.
-            data = json.load(data_file)
-            # Updating the old data with the new one.
-            data.update(new_data)
+        try:
+            with open("data.json", "r") as data_file:
+                # Reading the old data.
+                data = json.load(data_file)
+                # Updating the old data with the new one.
+                data.update(new_data)
 
-        with open("data.json", "w") as data_file:
-            # Saving the updated data in the file.
-            json.dump(data, data_file, indent=4)
-
-        website_entry.delete(0, END)
-        email_username_entry.delete(0, END)
-        password_entry.delete(0, END)
+            with open("data.json", "w") as data_file:
+                # Saving the updated data in the file.
+                json.dump(data, data_file, indent=4)
+        except json.decoder.JSONDecodeError:
+            with open("data.json", "w") as data_file:
+                data_file.write(json.dumps(new_data, indent=4))
+        finally:
+            website_entry.delete(0, END)
+            email_username_entry.delete(0, END)
+            password_entry.delete(0, END)
 
         website_entry.focus()
         email_username_entry.insert(0, "akileshakileshs1234@gmail.com")
+
+
+# ---------------------------- Search Password ------------------------------- #
+website_name = None
+website_password = None
+
+
+def find_password():
+    try:
+        global website_name
+        global website_password
+        website_entry_text = website_entry.get()
+        with open("data.json", "r") as data_file:
+            data = json.load(data_file)
+            for thing in data:
+                if thing == website_entry_text:
+                    website_name = thing
+                    website_password = data[thing]["password"]
+                    messagebox.showinfo(title=website_name, message=f"Website: {website_name}\n"
+                                                                    f"Password: {website_password}")
+                    website_entry.delete(0, END)
+    except json.decoder.JSONDecodeError:
+        messagebox.showinfo(title="Error", message="No details for the website exists.")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -98,8 +125,8 @@ password_label = Label(text="Password:", font=("Arial", 12, "normal"))
 password_label.grid(row=3, column=0)
 
 # Entries
-website_entry = Entry(width=35)
-website_entry.grid(row=1, column=1, columnspan=2)
+website_entry = Entry(width=19)
+website_entry.grid(row=1, column=1)
 website_entry.focus()
 
 email_username_entry = Entry(width=35)
@@ -117,4 +144,6 @@ generate_password_button.grid(row=3, column=2)
 add_button = Button(text="Add", width=36, command=save)
 add_button.grid(row=4, column=1, columnspan=2)
 
+search_button = Button(text="Search", width=15, command=find_password)
+search_button.grid(row=1, column=2)
 window.mainloop()
